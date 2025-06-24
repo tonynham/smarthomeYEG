@@ -54,8 +54,10 @@ html {
     color: #FF385C;
 }
 
-.logo i {
-    font-size: 24px;
+.logo-image {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
 }
 
 .nav-menu {
@@ -885,8 +887,11 @@ html {
     margin-bottom: 16px;
 }
 
-.footer-logo i {
-    font-size: 24px;
+.footer-logo .logo-image {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    filter: brightness(0) saturate(100%) invert(35%) sepia(85%) saturate(2270%) hue-rotate(340deg) brightness(98%) contrast(94%);
 }
 
 .footer-brand p {
