@@ -1,22 +1,172 @@
-// DOM Elements
-const hamburger = document.querySelector('.hamburger');
-const navMenu = document.querySelector('.nav-menu');
-const consultationForm = document.getElementById('consultationForm');
+// Test if JavaScript is loading
+console.log('Script.js is loading...');
+
+// DOM Elements - will be initialized in DOMContentLoaded
+let hamburger, navMenu, consultationForm;
 
 // Mobile Navigation Toggle
 function toggleMobileMenu() {
-    hamburger.classList.toggle('active');
-    navMenu.classList.toggle('active');
+    if (hamburger && navMenu) {
+        hamburger.classList.toggle('active');
+        navMenu.classList.toggle('active');
+    }
 }
 
-hamburger.addEventListener('click', toggleMobileMenu);
-
-// Close mobile menu when clicking on a link
-document.querySelectorAll('.nav-menu a').forEach(link => {
-    link.addEventListener('click', () => {
-        hamburger.classList.remove('active');
-        navMenu.classList.remove('active');
-    });
+// Form handling
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, setting up form...');
+    
+    // Initialize DOM elements
+    hamburger = document.querySelector('.hamburger');
+    navMenu = document.querySelector('.nav-menu');
+    consultationForm = document.getElementById('consultationForm');
+    
+    // Set up mobile menu if elements exist
+    if (hamburger && navMenu) {
+        hamburger.addEventListener('click', toggleMobileMenu);
+        
+        // Close mobile menu when clicking on a link
+        document.querySelectorAll('.nav-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                navMenu.classList.remove('active');
+            });
+        });
+    }
+    
+    const form = document.getElementById('consultationForm');
+    const successMessage = document.getElementById('successMessage');
+    
+    console.log('Form element:', form);
+    console.log('Success message element:', successMessage);
+    
+    if (form) {
+        console.log('Form found, adding event listener...');
+        
+        // Remove any existing event listeners and add ours with high priority
+        form.addEventListener('submit', function(e) {
+            console.log('Form submitted!');
+            // Don't prevent default - let form submit to hidden iframe
+            // e.preventDefault(); // REMOVED - let form submit naturally
+            console.log('Form will submit to hidden iframe');
+            
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.innerHTML;
+            console.log('Submit button:', submitButton);
+            console.log('Original button text:', originalButtonText);
+            
+            // Show loading state
+            submitButton.innerHTML = '<span>Sending...</span><i class="fas fa-spinner fa-spin"></i>';
+            submitButton.disabled = true;
+            console.log('Loading state set');
+            
+            // Log form data for debugging
+            const formData = new FormData(form);
+            console.log('FormData created');
+            for (let [key, value] of formData.entries()) {
+                console.log(`Form field ${key}: ${value}`);
+            }
+            
+            console.log('Form will submit to iframe:', form.target);
+            
+            // Show popup immediately - don't wait for iframe submission
+            setTimeout(() => {
+                console.log('Showing success popup after brief loading');
+                showSuccessPopup();
+                resetForm();
+            }, 800); // Show after brief loading state
+            
+            // Form submits naturally to hidden iframe in background
+            // No fetch needed - the form handles submission
+        }, true); // Use capture phase to ensure our handler runs first
+        
+        // Success popup function
+        function showSuccessPopup() {
+            console.log('Showing success popup immediately');
+            
+            // Create popup overlay with immediate visibility
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            
+            // Create popup content with immediate visibility
+            const popup = document.createElement('div');
+            popup.style.cssText = `
+                background: white;
+                padding: 40px;
+                border-radius: 16px;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+                text-align: center;
+                max-width: 400px;
+                margin: 20px;
+            `;
+            
+            popup.innerHTML = `
+                <div style="color: #10B981; font-size: 4rem; margin-bottom: 20px;">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3 style="font-size: 1.8rem; color: #222; margin-bottom: 16px; font-weight: 600;">
+                    Submission Successful!
+                </h3>
+                <p style="font-size: 1.1rem; color: #6B7280; line-height: 1.6; margin-bottom: 30px;">
+                    Thank you for your interest! Tony will be contacting you shortly to discuss your smart home consultation.
+                </p>
+                <button onclick="this.closest('.popup-overlay').remove()" style="
+                    background: #FF385C;
+                    color: white;
+                    padding: 12px 24px;
+                    border: none;
+                    border-radius: 8px;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: background 0.2s ease;
+                " onmouseover="this.style.background='#E31C5F'" onmouseout="this.style.background='#FF385C'">
+                    Close
+                </button>
+            `;
+            
+            overlay.className = 'popup-overlay';
+            overlay.appendChild(popup);
+            document.body.appendChild(overlay);
+            
+            console.log('Popup added to DOM - should be visible now');
+            
+            // Auto close after 6 seconds
+            setTimeout(() => {
+                if (overlay.parentNode) {
+                    overlay.remove();
+                    console.log('Popup auto-closed after 6 seconds');
+                }
+            }, 6000);
+        }
+        
+        // Form reset function
+        function resetForm() {
+            console.log('Resetting form');
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalButtonText = '<span>Get My Free Consultation</span><i class="fas fa-arrow-right"></i>';
+            
+            form.reset();
+            submitButton.innerHTML = originalButtonText;
+            submitButton.disabled = false;
+            console.log('Form reset complete');
+        }
+        
+        console.log('Event listener added successfully');
+    } else {
+        console.error('Form not found!');
+    }
 });
 
 // Smooth scrolling for all anchor links
@@ -37,165 +187,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-// Enhanced Consultation Form Handling
-consultationForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(consultationForm);
-    const name = formData.get('name');
-    const email = formData.get('email');
-    const phone = formData.get('phone');
-    const property = formData.get('property');
-    const message = formData.get('message');
-    
-    // Enhanced validation
-    if (!name || !email || !message) {
-        showNotification('Please fill in all required fields.', 'error');
-        return;
-    }
-    
-    if (name.length < 2) {
-        showNotification('Please enter a valid name.', 'error');
-        return;
-    }
-    
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        showNotification('Please enter a valid email address.', 'error');
-        return;
-    }
-    
-    // Create enhanced mailto content
-    const subject = encodeURIComponent('Smart Home Consultation Request - ' + name);
-    const body = encodeURIComponent(
-        `Hello Tony,\n\n` +
-        `I'm interested in a free smart home consultation for my ${property || 'property'} in Edmonton.\n\n` +
-        `CONTACT DETAILS:\n` +
-        `Name: ${name}\n` +
-        `Email: ${email}\n` +
-        `Phone: ${phone || 'Not provided'}\n` +
-        `Property Type: ${property || 'Not specified'}\n\n` +
-        `SMART HOME INTERESTS:\n` +
-        `${message}\n\n` +
-        `Please contact me to schedule my free consultation.\n\n` +
-        `Best regards,\n${name}\n\n` +
-        `--\nSent from Smart Home YEG website`
-    );
-    
-    const mailtoLink = `mailto:tony@smarthomeyeg.com?subject=${subject}&body=${body}`;
-    
-    try {
-        window.location.href = mailtoLink;
-        showSuccessMessage();
-        consultationForm.reset();
-    } catch (error) {
-        console.error('Error opening email client:', error);
-        copyToClipboard(`Name: ${name}\nEmail: ${email}\nPhone: ${phone}\nProperty: ${property}\nMessage: ${message}`);
-        showNotification('Email client could not be opened. Your information has been copied to clipboard. Please email it to tony@smarthomeyeg.com', 'info');
-    }
-});
-
-// Enhanced Success Message
-function showSuccessMessage() {
-    const successDiv = document.createElement('div');
-    successDiv.innerHTML = `
-        <div style="
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #10B981;
-            color: white;
-            padding: 32px;
-            border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(16, 185, 129, 0.3);
-            z-index: 10000;
-            text-align: center;
-            max-width: 400px;
-            animation: slideIn 0.3s ease-out;
-        ">
-            <i class="fas fa-check-circle" style="font-size: 48px; margin-bottom: 16px; color: white;"></i>
-            <h3 style="margin-bottom: 12px; font-size: 20px; font-weight: 600;">Thank You!</h3>
-            <p style="margin: 0; opacity: 0.9; line-height: 1.5;">Your consultation request is ready. Your email client should open shortly with a pre-filled message.</p>
-        </div>
-        <style>
-            @keyframes slideIn {
-                from { transform: translate(-50%, -60%) scale(0.9); opacity: 0; }
-                to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-            }
-        </style>
-    `;
-    
-    document.body.appendChild(successDiv);
-    
-    setTimeout(() => {
-        successDiv.style.animation = 'slideOut 0.3s ease-in forwards';
-        setTimeout(() => {
-            if (successDiv.parentNode) {
-                document.body.removeChild(successDiv);
-            }
-        }, 300);
-    }, 4000);
-}
-
-// Enhanced Notification System
-function showNotification(message, type = 'info') {
-    const colors = {
-        error: '#EF4444',
-        success: '#10B981',
-        info: '#3B82F6'
-    };
-    
-    const notification = document.createElement('div');
-    notification.innerHTML = `
-        <div style="
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: ${colors[type]};
-            color: white;
-            padding: 16px 20px;
-            border-radius: 8px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            z-index: 10000;
-            max-width: 350px;
-            animation: slideInRight 0.3s ease-out;
-        ">
-            <p style="margin: 0; font-size: 14px; line-height: 1.4;">${message}</p>
-        </div>
-        <style>
-            @keyframes slideInRight {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-        </style>
-    `;
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.style.animation = 'slideOutRight 0.3s ease-in forwards';
-        setTimeout(() => {
-            if (notification.parentNode) {
-                document.body.removeChild(notification);
-            }
-        }, 300);
-    }, 4000);
-}
-
-// Copy to clipboard function
-function copyToClipboard(text) {
-    if (navigator.clipboard) {
-        navigator.clipboard.writeText(text);
-    } else {
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-    }
-}
+// Conflicting form handlers removed to prevent delays
 
 // Enhanced Navbar Scroll Effect
 window.addEventListener('scroll', function() {
@@ -389,8 +381,35 @@ function initPageLoading() {
     });
 }
 
+// Simple gallery flip functionality - Basic version
+function simpleFlipCard(element) {
+    console.log('Simple flip called on:', element);
+    element.classList.toggle('flipped');
+    console.log('Flipped class toggled. Classes now:', element.className);
+}
+
+// Very simple gallery initialization
+function simpleInitGallery() {
+    console.log('Simple gallery init starting...');
+    
+    const cards = document.querySelectorAll('.gallery-item');
+    console.log('Found cards:', cards.length);
+    
+    cards.forEach((card, index) => {
+        console.log(`Adding click to card ${index}`);
+        card.addEventListener('click', function() {
+            console.log(`Card ${index} clicked!`);
+            simpleFlipCard(this);
+        });
+        card.style.cursor = 'pointer';
+    });
+}
+
 // Initialize all functionality
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM Content Loaded - Starting simple init...');
+    
+    // Initialize other functionality
     initDeviceCards();
     initScrollAnimations();
     animateCounters();
@@ -398,6 +417,11 @@ document.addEventListener('DOMContentLoaded', function() {
     initClickToCall();
     initFormAnimations();
     initPageLoading();
+    
+    // Initialize gallery with extra delay to ensure everything is ready
+    setTimeout(() => {
+        simpleInitGallery();
+    }, 1000);
     
     // Add subtle parallax effect to hero
     window.addEventListener('scroll', () => {
@@ -407,4 +431,85 @@ document.addEventListener('DOMContentLoaded', function() {
             heroVisual.style.transform = `translateY(${scrolled * 0.2}px)`;
         }
     });
-}); 
+    
+    console.log('All initialization complete');
+});
+
+// Test functions accessible from console
+window.testSimpleFlip = function() {
+    const card = document.querySelector('.gallery-item');
+    if (card) {
+        console.log('Testing simple flip...');
+        simpleFlipCard(card);
+    } else {
+        console.log('No cards found for test');
+    }
+};
+
+window.forceFlip = function() {
+    const card = document.querySelector('.gallery-item');
+    if (card) {
+        console.log('Force adding flipped class...');
+        card.classList.add('flipped');
+    }
+};
+
+// Test function to check popup immediately
+window.testPopup = function() {
+    console.log('Testing popup...');
+    
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    `;
+    
+    const popup = document.createElement('div');
+    popup.style.cssText = `
+        background: white;
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        max-width: 400px;
+        margin: 20px;
+    `;
+    
+    popup.innerHTML = `
+        <div style="color: #10B981; font-size: 4rem; margin-bottom: 20px;">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h3 style="font-size: 1.8rem; color: #222; margin-bottom: 16px; font-weight: 600;">
+            TEST POPUP
+        </h3>
+        <p style="font-size: 1.1rem; color: #6B7280; line-height: 1.6; margin-bottom: 30px;">
+            This is a test popup to verify styling works correctly.
+        </p>
+        <button onclick="this.closest('.popup-overlay').remove()" style="
+            background: #FF385C;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        ">
+            Close Test
+        </button>
+    `;
+    
+    overlay.className = 'popup-overlay';
+    overlay.appendChild(popup);
+    document.body.appendChild(overlay);
+    
+    console.log('Test popup should be visible now');
+}; 
